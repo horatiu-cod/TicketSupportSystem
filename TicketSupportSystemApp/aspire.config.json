@@ -1,0 +1,6 @@
+{
+  "appHost": {
+    "path": "TicketSupportSystemApp.AppHost/TicketSupportSystemApp.AppHost.csproj"
+  },
+  "channel": "stable"
+}
