@@ -18,6 +18,9 @@ public static class Endpoints
         routes.MapGroup("/api/attachments/")
             .MapAttachementsEndpoints()
             .WithTags("Attachments");
+        routes.MapGroup("/api/tickets/")
+            .MapTicketsEndpoints()
+            .WithTags("Tickets");
     }
     public static RouteGroupBuilder MapCommentsEndpoints(this RouteGroupBuilder group)
     {
@@ -51,7 +54,7 @@ public static class Endpoints
             }
         }).RequireAuthorization( policy => policy.RequireRole("Admin"));
 
-        group.MapDelete("/{id}", async (Guid id, ICommentsService _commentsService) =>
+        group.MapDelete("{id}", async (Guid id, ICommentsService _commentsService) =>
         {
             try
             {
@@ -105,6 +108,120 @@ public static class Endpoints
                 return Results.NotFound(ex.Message);
             }
         });
+        return group;
+    }
+    public static RouteGroupBuilder MapTicketsEndpoints(this RouteGroupBuilder group)
+    {
+        group.MapGet("/", async (TicketsQueryFilters filters, ITicketsService _ticketsService) =>
+        {
+            var tickets = await _ticketsService.GetTickets(filters);
+            return Results.Ok(tickets);
+        }).RequireAuthorization(policy => policy.RequireRole("Admin", "SupportAgent"));
+
+        group.MapGet("{id}", async (Guid id, ITicketsService _ticketsService, UserManager<User> _userManager, ClaimsPrincipal user) =>
+        {
+           try
+            {
+                var ticket = await _ticketsService.GetTicket(id);
+
+                var currentUserEmail = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                var curentUser = await _userManager.FindByEmailAsync(currentUserEmail?? throw new NotFoundException("User email not found in claims.")) 
+                    ?? throw new NotFoundException("User not found.");
+                var isCustomer = await _userManager.IsInRoleAsync(curentUser, "Customer");
+
+                if (isCustomer && ticket.UserId != curentUser.Id)
+                {
+                    return Results.Forbid();
+                }
+
+                return Results.Ok(ticket);
+            }
+            catch (NotFoundException)
+            {
+                return Results.NotFound();
+            }        
+        }).RequireAuthorization();
+
+        group.MapPost("/", async (CreateTicketDTO ticketDTO, ITicketsService _ticketsService, IValidator<CreateTicketDTO> createTicketValidator) =>
+        {
+            var validationRes = createTicketValidator.Validate(ticketDTO);
+            if (!validationRes.IsValid)
+                return Results.BadRequest(validationRes);
+
+            var ticketId = await _ticketsService.CreateTicket(ticketDTO);
+            return Results.Created($"/api/tickets/{ticketId}", new { Id = ticketId });
+        }).RequireAuthorization();
+
+        group.MapPut("{id}", async (Guid id, UpdateTicketDTO ticketDTO, ITicketsService _ticketsService) =>
+        {
+            try
+            {
+                await _ticketsService.UpdateTicket(id, ticketDTO);
+                return Results.Ok();
+            }
+            catch (NotFoundException)
+            {
+                return Results.NotFound();
+            }
+        }).RequireAuthorization();
+
+        group.MapDelete("{id}", async (Guid id, ITicketsService _ticketsService) =>
+        {
+            try
+            {
+                await _ticketsService.DeleteTicket(id);
+                return Results.Ok();
+            }
+            catch (NotFoundException)
+            {
+                return Results.NotFound();
+            }
+        }).RequireAuthorization(policy => policy.RequireRole("Admin"));
+
+        group.MapPost("{id}/comments", async (Guid id, CreateCommentDTO commentDTO, ICommentsService _commentsService, IValidator<CreateCommentDTO> createCommentValidator) =>
+        {
+            var validationRes = createCommentValidator.Validate(commentDTO);
+            if (!validationRes.IsValid)
+                return Results.BadRequest(validationRes);
+
+            try
+            {
+                var commentId = await _commentsService.CreateComment(commentDTO);
+                return Results.Created($"/api/comments/{commentId}", new { Id = commentId });
+            }
+            catch (NotFoundException)
+            {
+                return Results.NotFound();
+            }
+        }).RequireAuthorization();
+
+        group.MapGet("{id}/comments", async (Guid id, ICommentsService _commentsService, 
+                                            UserManager<User> _userManager, ClaimsPrincipal User) =>
+        {
+            var currentUserEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var user = await _userManager.FindByEmailAsync(currentUserEmail?? throw new NotFoundException("User email not found in claims.")) 
+                ?? throw new NotFoundException("User not found.");
+            var isCustomer = await _userManager.IsInRoleAsync(user, "Customer");
+
+
+            if (isCustomer && user.CreatedTickets.FirstOrDefault(t => t.Id == id) == null)
+            {
+                return Results.Forbid();
+            }
+
+            try
+            {
+               var comments  = await _commentsService.GetCommentsToTicket(id);
+               return Results.Ok(comments);
+            }
+            catch (NotFoundException)
+            {
+                return Results.NotFound();
+            }
+        }).RequireAuthorization();
+
         return group;
     }
 }

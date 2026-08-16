@@ -10,8 +10,8 @@ public sealed class Ticket : EntityBase
     public DateTimeOffset? ClosedAt { get; private set; }
     public Guid UserId { get; private set; }
     public Guid? AssignedToId { get; private set; }
-    public User User { get; private set; } = null!;
-    public User? AssignedTo { get; private set; }
+    public Customer Customer { get; private set; } = null!;
+    public Agent? AssignedTo { get; private set; }
     public List<Comment> Comments { get; private set; } = [];
 
     private Ticket()
@@ -20,7 +20,8 @@ public sealed class Ticket : EntityBase
         Description = string.Empty;
     }
 
-    public Ticket(string title, string description, Priority priority, Guid userId, Guid? assignedToId = null)
+    public Ticket(string title, string description, Priority priority, Guid userId, Guid? 
+                    assignedToId = null)
     {
         Title = title;
         Description = description;
@@ -29,21 +30,22 @@ public sealed class Ticket : EntityBase
         AssignedToId = assignedToId;
     }
 
-    public static Ticket Create(string title, string description, Priority priority, Guid userId, Guid? assignedToId = null)
+    public static Ticket Create(string title, string description, Priority priority, Guid userId, 
+                                Guid? assignedToId = null)
     {
         ValidateInputs(title, description, userId);
         return new Ticket(title, description, priority, userId, assignedToId);
     } 
-    public void Update(string newTitle, string newDescription, Priority newPriority, Status newStatus, Guid? newAssignedToId = null)
+    public void Update(string title, string description, Priority priority, Status status, Guid? assignedToId = null)
     {
-        ValidateInputs(newTitle, newDescription, UserId);
-        Title = newTitle;
-        Description = newDescription;
-        Priority = newPriority;
-        Status = newStatus;
-        AssignedToId = newAssignedToId;
+        ValidateInputs(title, description);
+        Title = title;
+        Description = description;
+        Priority = priority;
+        Status = status;
+        AssignedToId = assignedToId;
 
-        if (newStatus == Status.Closed)
+        if (status == Status.Closed)
         {
             ClosedAt = DateTimeOffset.UtcNow;
         }
@@ -60,7 +62,7 @@ public sealed class Ticket : EntityBase
         UpdateLastModified();
     }
 
-    private static void ValidateInputs(string title, string description, Guid userId)
+    private static void ValidateInputs(string title, string description, Guid userId = default(Guid))
     {
         if (string.IsNullOrWhiteSpace(title))
         {

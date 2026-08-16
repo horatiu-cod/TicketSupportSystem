@@ -13,14 +13,14 @@ internal static class Mappers
     {
         return new TicketDTO(ticket.Id, ticket.Title, ticket.Description, ticket.Priority, 
         ticket.Status, ticket.CreatedAt, ticket.UpdatedAt, ticket.ClosedAt, ticket.UserId, 
-        ticket.User.Name, ticket.User.Email!, ticket.AssignedTo?.Name, ticket.AssignedTo?.Email);
+        ticket.Customer.Name, ticket.Customer.Email!, ticket.AssignedTo?.Name, ticket.AssignedTo?.Email);
     }
     internal static TicketDetailsDTO MapToTicketDetailsDTO(this Ticket ticket)
     {
         return new TicketDetailsDTO(ticket.Id, ticket.Priority, ticket.Status, 
         ticket.CreatedAt, ticket.UpdatedAt, ticket.ClosedAt, ticket.UserId, 
         ticket.AssignedTo?.Name, ticket.AssignedTo?.Email, ticket.Title, ticket.Description, 
-        ticket.User.Name, ticket.User.Email!)
+        ticket.Customer.Name, ticket.Customer.Email!)
         {
             Comments = [.. ticket.Comments.Select(c => c.MapToCommentDTO())]
         };
