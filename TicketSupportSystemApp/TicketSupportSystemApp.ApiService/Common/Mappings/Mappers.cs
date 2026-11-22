@@ -7,18 +7,18 @@ internal static class Mappers
     internal static Ticket MapToTicket(this CreateTicketDTO createTicketDTO)
     {
         return Ticket.Create(createTicketDTO.Title, createTicketDTO.Description, createTicketDTO.Priority, 
-                            createTicketDTO.UserId, createTicketDTO.AssignedToId);
+                            createTicketDTO.CustomerId);
     }
     internal static TicketDTO MapToTicketDTO(this Ticket ticket)
     {
         return new TicketDTO(ticket.Id, ticket.Title, ticket.Description, ticket.Priority, 
-        ticket.Status, ticket.CreatedAt, ticket.UpdatedAt, ticket.ClosedAt, ticket.UserId, 
+        ticket.Status, ticket.CreatedAt, ticket.UpdatedAt, ticket.ClosedAt, ticket.CustomerId, 
         ticket.Customer.Name, ticket.Customer.Email!, ticket.AssignedTo?.Name, ticket.AssignedTo?.Email);
     }
     internal static TicketDetailsDTO MapToTicketDetailsDTO(this Ticket ticket)
     {
         return new TicketDetailsDTO(ticket.Id, ticket.Priority, ticket.Status, 
-        ticket.CreatedAt, ticket.UpdatedAt, ticket.ClosedAt, ticket.UserId, 
+        ticket.CreatedAt, ticket.UpdatedAt, ticket.ClosedAt, ticket.CustomerId, ticket.AssignedToId,
         ticket.AssignedTo?.Name, ticket.AssignedTo?.Email, ticket.Title, ticket.Description, 
         ticket.Customer.Name, ticket.Customer.Email!)
         {

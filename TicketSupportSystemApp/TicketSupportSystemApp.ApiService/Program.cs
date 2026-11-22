@@ -56,9 +56,6 @@ builder.Services.AddAuthentication(opt =>
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCommentValidator>();
 
 builder.Services.AddScoped<ITicketsService, TicketsService>();
@@ -71,10 +68,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+//if (app.Environment.IsDevelopment()){}
 
 app.MapGet("/", () => "API service is running. Navigate to /weatherforecast to see sample data.");
 

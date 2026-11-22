@@ -7,20 +7,13 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 {
     public void Configure(EntityTypeBuilder<Customer> builder)
     {
-        builder.Property(customer => customer.Name)
-            .HasMaxLength(100)
-            .IsRequired();
-        builder.Property(customer => customer.Surname)
-            .HasMaxLength(100)
-            .IsRequired();
+        // Configure the primary key for the Customer entity
+        builder.HasKey(c => c.Id);
+
+        // Configure the relationship between Customer and Ticket
         builder.HasMany(customer => customer.CreatedTickets)
                 .WithOne(ticket => ticket.Customer)
-                .HasForeignKey(ticket => ticket.UserId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
-        builder.HasMany(customer => customer.Comments)
-                .WithOne(comment => comment.Customer)
-                .HasForeignKey(comment => comment.UserId)
+                .HasForeignKey(ticket => ticket.CustomerId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
     }

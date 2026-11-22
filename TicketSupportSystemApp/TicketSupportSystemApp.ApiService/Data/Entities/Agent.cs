@@ -6,5 +6,4 @@ public sealed class Agent : User
     public List<Ticket> AssignedTickets { get; set; } = [];
     public AgentDetails? AgentDetails {get; private set;}
 
-    
 }

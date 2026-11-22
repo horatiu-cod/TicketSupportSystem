@@ -8,11 +8,11 @@ public sealed class Ticket : EntityBase
     public Priority Priority { get; private set; }
     public Status Status { get; private set; }
     public DateTimeOffset? ClosedAt { get; private set; }
-    public Guid UserId { get; private set; }
+    public Guid CustomerId { get; private set; }
     public Guid? AssignedToId { get; private set; }
     public Customer Customer { get; private set; } = null!;
     public Agent? AssignedTo { get; private set; }
-    public List<Comment> Comments { get; private set; } = [];
+    public ICollection<Comment> Comments { get; private set; } = [];
 
     private Ticket()
     {
@@ -20,21 +20,21 @@ public sealed class Ticket : EntityBase
         Description = string.Empty;
     }
 
-    public Ticket(string title, string description, Priority priority, Guid userId, Guid? 
+    public Ticket(string title, string description, Priority priority, Guid customerId, Guid? 
                     assignedToId = null)
     {
         Title = title;
         Description = description;
         Priority = priority;
-        UserId = userId;
+        CustomerId = customerId;
         AssignedToId = assignedToId;
     }
 
-    public static Ticket Create(string title, string description, Priority priority, Guid userId, 
+    public static Ticket Create(string title, string description, Priority priority, Guid customerId, 
                                 Guid? assignedToId = null)
     {
-        ValidateInputs(title, description, userId);
-        return new Ticket(title, description, priority, userId, assignedToId);
+        ValidateInputs(title, description, customerId);
+        return new Ticket(title, description, priority, customerId, assignedToId);
     } 
     public void Update(string title, string description, Priority priority, Status status, Guid? assignedToId = null)
     {
@@ -62,7 +62,7 @@ public sealed class Ticket : EntityBase
         UpdateLastModified();
     }
 
-    private static void ValidateInputs(string title, string description, Guid userId = default(Guid))
+    private static void ValidateInputs(string title, string description, Guid customerId = default(Guid))
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -74,9 +74,9 @@ public sealed class Ticket : EntityBase
             throw new ArgumentException("Description cannot be null or empty.", nameof(description));
         }
 
-        if (userId == Guid.Empty)
+        if (customerId == Guid.Empty)
         {
-            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+            throw new ArgumentException("Customer ID cannot be empty.", nameof(customerId));
         }
     }
 

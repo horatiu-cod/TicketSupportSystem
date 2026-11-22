@@ -4,7 +4,7 @@ public sealed class Comment : EntityBase
     public string Text { get; private set; } 
     public Guid UserId { get; private set; }
     public Guid TicketId { get; private set; }
-    //public User User { get; private set; } = null!;
+    public User User { get; private set; } = null!;
     public Ticket Ticket { get; private set; } = null!;
 
     public List<Attachment> Attachments { get; private set; } = [];

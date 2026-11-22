@@ -9,6 +9,6 @@ public class TicketsQueryFilters
     public string Order { get; set; } = "desc";
     public Priority? Priority { get; set; }
     public Status? Status { get; set; }
-    public Guid? AsignedToId { get; set; }
-    public Guid? UserId { get; set; }
+    public Guid? AssignedToId { get; set; }
+    public Guid? CustomerId { get; set; }
 }

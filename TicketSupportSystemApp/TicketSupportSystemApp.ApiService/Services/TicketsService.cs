@@ -7,13 +7,10 @@ using TicketSupportSystemApp.ApiService.Interfaces;
 using TicketSupportSystemApp.ApiService.Common.Exceptions;
 
 namespace TicketSupportSystemApp.ApiService.Services;
-public class TicketsService : ITicketsService
+public class TicketsService(TicketSupportSystemContext context) : ITicketsService
 {
-    private readonly TicketSupportSystemContext _context;
-    public TicketsService(TicketSupportSystemContext context)
-    {
-        _context = context;
-    }
+    private readonly TicketSupportSystemContext _context = context;
+
     public async Task<Guid> CreateTicket(CreateTicketDTO ticketDTO)
     {
         var newTicket = Mappers.MapToTicket(ticketDTO);
@@ -39,16 +36,11 @@ public class TicketsService : ITicketsService
     public async Task<TicketDetailsDTO> GetTicket(Guid id)
     {
         var tickets = await _context.Tickets
-            .Include(ticket => ticket.User)
+            .Include(ticket => ticket.Customer)
             .Include(ticket => ticket.AssignedTo)
             .Include(ticket => ticket.Comments)
             .ToListAsync();
-        var ticket = tickets.FirstOrDefault(t => t.Id == id);
-        if (ticket == null)
-        {
-            throw new NotFoundException();
-        }
-
+        var ticket = tickets.FirstOrDefault(t => t.Id == id) ?? throw new NotFoundException();
         var ticketDto = Mappers.MapToTicketDetailsDTO(ticket);
 
         return ticketDto;
@@ -57,7 +49,7 @@ public class TicketsService : ITicketsService
     private async Task<FilteredTicketsDTO> ApplyFilters(TicketsQueryFilters filters)
     {
         var query = _context.Tickets
-            .Include(ticket => ticket.User)
+            .Include(ticket => ticket.Customer)
             .Include(ticket => ticket.AssignedTo)
             .Include(ticket => ticket.Comments)
             .AsQueryable();
@@ -84,14 +76,14 @@ public class TicketsService : ITicketsService
             query = query.Where(t => t.Status == filters.Status);
         }
 
-        if (filters.UserId != null)
+        if (filters.CustomerId != null)
         {
-            query = query.Where(t => t.UserId == filters.UserId);
+            query = query.Where(t => t.CustomerId == filters.CustomerId);
         }
 
-        if (filters.AsignedToId != null)
+        if (filters.AssignedToId != null)
         {
-            query = query.Where(t => t.AssignedToId == filters.AsignedToId);
+            query = query.Where(t => t.AssignedToId == filters.AssignedToId);
         }
 
         var total = await query.CountAsync();

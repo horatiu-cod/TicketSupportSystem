@@ -16,7 +16,7 @@ public class CreateTicketValidator : AbstractValidator<CreateTicketDTO>
                 .NotEmpty();
         RuleFor(ct => ct.Priority)
                 .IsInEnum();
-        RuleFor(ct => ct.UserId)
+        RuleFor(ct => ct.CustomerId)
                 .NotNull();
     }
 }

@@ -130,7 +130,7 @@ public static class Endpoints
                     ?? throw new NotFoundException("User not found.");
                 var isCustomer = await _userManager.IsInRoleAsync(curentUser, "Customer");
 
-                if (isCustomer && ticket.UserId != curentUser.Id)
+                if (isCustomer && ticket.CustomerId != curentUser.Id)
                 {
                     return Results.Forbid();
                 }
@@ -196,7 +196,7 @@ public static class Endpoints
             }
         }).RequireAuthorization();
 
-        group.MapGet("{id}/comments", async (Guid id, ICommentsService _commentsService, 
+        group.MapGet("{id}/comments", async (Guid id, ICommentsService _commentsService, ITicketsService _ticketsService,
                                             UserManager<User> _userManager, ClaimsPrincipal User) =>
         {
             var currentUserEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -204,9 +204,9 @@ public static class Endpoints
             var user = await _userManager.FindByEmailAsync(currentUserEmail?? throw new NotFoundException("User email not found in claims.")) 
                 ?? throw new NotFoundException("User not found.");
             var isCustomer = await _userManager.IsInRoleAsync(user, "Customer");
+            var ticket = await _ticketsService.GetTicket(id) ?? throw new NotFoundException("Ticket not found.");
 
-
-            if (isCustomer && user.CreatedTickets.FirstOrDefault(t => t.Id == id) == null)
+            if (isCustomer && ticket.CustomerId != user.Id)
             {
                 return Results.Forbid();
             }
