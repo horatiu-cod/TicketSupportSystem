@@ -22,16 +22,6 @@ var config = builder.Configuration;
 string connection = config.GetConnectionString("DefaultConnection")??throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<TicketSupportSystemContext>(options => options.UseSqlServer(connection));
 
-builder.Services.AddIdentity<User, Role>(o =>
-    {
-        o.Password.RequireDigit = false;
-        o.Password.RequireLowercase = false;
-        o.Password.RequireUppercase = false;
-        o.Password.RequireNonAlphanumeric = false;
-        o.User.RequireUniqueEmail = true;
-    })
-    .AddEntityFrameworkStores<TicketSupportSystemContext>()
-    .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication(opt =>
 {
@@ -69,8 +59,6 @@ var app = builder.Build();
 app.UseExceptionHandler();
 
 //if (app.Environment.IsDevelopment()){}
-
-app.MapGet("/", () => "API service is running. Navigate to /weatherforecast to see sample data.");
 
 app.MapDefaultEndpoints();
 

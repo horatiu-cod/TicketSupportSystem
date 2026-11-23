@@ -25,7 +25,7 @@ public static class Endpoints
     public static RouteGroupBuilder MapCommentsEndpoints(this RouteGroupBuilder group)
     {
         group.MapPut("{id}", async (Guid id, UpdateCommentDTO commentDTO, 
-            ICommentsService _commentsService, IValidator<UpdateCommentDTO> updateCommentValidator,
+            ICommentsService commentsService, IValidator<UpdateCommentDTO> updateCommentValidator,
             UserManager<User> userManager , ClaimsPrincipal user) =>
         {
             var validationRes = updateCommentValidator.Validate(commentDTO);
@@ -44,7 +44,7 @@ public static class Endpoints
                     return Results.Forbid();
                 }
 
-                await _commentsService.UpdateComment(id, commentDTO);
+                await commentsService.UpdateComment(id, commentDTO);
 
                 return Results.Ok();
             }
@@ -58,7 +58,7 @@ public static class Endpoints
         {
             try
             {
-                await _commentsService.DeleteComment(id);
+                await commentsService.DeleteComment(id);
 
                 return Results.Ok();
             }
