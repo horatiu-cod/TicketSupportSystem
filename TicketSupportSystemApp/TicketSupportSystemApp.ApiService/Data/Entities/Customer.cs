@@ -1,7 +1,8 @@
 namespace TicketSupportSystemApp.ApiService.Data.Entities;
 
-public sealed class Customer : User
+public sealed class Customer 
 {
+    public Guid Id { get; private init; } = Guid.CreateVersion7();
     public CustomerDetails? CustomerDetails { get; private set; }
     public List<Ticket> CreatedTickets { get; private set; } = [];
 
